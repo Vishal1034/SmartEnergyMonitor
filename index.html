@@ -1,277 +1,553 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Smart Energy Dashboard</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
+
 <body class="bg-slate-900 text-white min-h-screen p-6 font-sans">
 
+
+
     <div class="max-w-6xl mx-auto flex justify-between items-center mb-8">
+
         <div>
+
             <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+
                 NILM Energy Monitor
+
             </h1>
+
             <p class="text-slate-400 mt-1">Live Telemetry & AI Signature Capture</p>
+
         </div>
+
         <div class="flex items-center gap-2 bg-slate-800 px-4 py-2 rounded-full border border-slate-700">
+
             <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+
             <span class="text-sm font-medium text-emerald-400" id="sync-status">System Live</span>
+
         </div>
+
     </div>
+
+
 
     <div class="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-        
-        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
-            <h3 class="text-slate-400 text-sm font-semibold mb-1">Voltage</h3>
-            <div class="text-2xl font-bold text-yellow-400"><span id="val-voltage">0.0</span> V</div>
-        </div>
+
+       
 
         <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
-            <h3 class="text-slate-400 text-sm font-semibold mb-1">Current</h3>
-            <div class="text-2xl font-bold text-blue-400"><span id="val-current">0.000</span> A</div>
+
+            <h3 class="text-slate-400 text-sm font-semibold mb-1">Voltage</h3>
+
+            <div class="text-2xl font-bold text-yellow-400"><span id="val-voltage">0.0</span> V</div>
+
         </div>
+
+
+
+        <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg">
+
+            <h3 class="text-slate-400 text-sm font-semibold mb-1">Current</h3>
+
+            <div class="text-2xl font-bold text-blue-400"><span id="val-current">0.000</span> A</div>
+
+        </div>
+
+
 
         <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg relative overflow-hidden">
+
             <div class="absolute inset-0 bg-cyan-500/10 opacity-0 transition-opacity" id="power-glow"></div>
+
             <h3 class="text-slate-400 text-sm font-semibold mb-1">Power</h3>
+
             <div class="text-2xl font-bold text-cyan-400"><span id="val-power">0.0</span> W</div>
+
         </div>
+
+
 
         <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg border-b-4 border-b-purple-500">
+
             <h3 class="text-slate-400 text-sm font-semibold mb-1">Power Factor (ML)</h3>
+
             <div class="text-2xl font-bold text-purple-400"><span id="val-pf">0.00</span></div>
+
         </div>
+
+
 
         <div class="bg-slate-800 p-5 rounded-xl border border-slate-700 shadow-lg border-b-4 border-b-emerald-500">
+
             <h3 class="text-slate-400 text-sm font-semibold mb-1">Est. Bill (TN)</h3>
+
             <div class="text-2xl font-bold text-emerald-400">₹<span id="val-bill">0.00</span></div>
+
         </div>
+
     </div>
+
+
 
     <div class="max-w-6xl mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg mb-8 flex items-center justify-between">
+
         <div>
+
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
+
                 <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+
                 Live AI Appliance Detection
+
             </h2>
+
             <p class="text-slate-400 text-sm mt-1">Real-time edge inference based on ML power signatures</p>
+
         </div>
+
         <div class="px-6 py-4 bg-slate-900 rounded-lg border border-slate-700 shadow-inner">
+
             <span class="text-3xl font-bold text-slate-500" id="ai-prediction">Waiting for data...</span>
+
         </div>
+
     </div>
+
+
 
     <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-6">
+
         <div class="bg-slate-800 p-6 rounded-xl border border-slate-600 shadow-lg relative overflow-hidden transition-all duration-300" id="alert-card">
+
             <div class="absolute top-0 right-0 w-16 h-16 bg-rose-500/10 rounded-bl-full"></div>
+
             <h3 class="text-slate-400 font-bold flex items-center gap-2 mb-2" id="alert-title">
+
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+
                 Peak Usage Alert
+
             </h3>
+
             <p id="insight-alert" class="text-slate-300">Collecting data to analyze trends...</p>
+
         </div>
+
+
 
         <div class="bg-slate-800 p-6 rounded-xl border border-emerald-500/50 shadow-lg relative overflow-hidden">
+
             <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-full"></div>
+
             <h3 class="text-emerald-400 font-bold flex items-center gap-2 mb-2">
+
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+
                 AI Savings Tip
+
             </h3>
+
             <p id="insight-tip" class="text-slate-300">Calculating potential savings...</p>
+
         </div>
+
     </div>
+
+
 
     <div class="max-w-6xl mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+
         <h2 class="text-lg font-semibold text-slate-300 mb-4">Real-Time Power Signature (W)</h2>
+
         <div class="relative h-72 w-full">
+
             <canvas id="powerChart"></canvas>
+
         </div>
+
     </div>
 
+
+
     <script>
+
         // 2. TN BILL CALCULATOR (Ported from C++)
+
         function calculateTNBill(units) {
+
             let bill = 0.0;
+
             if (units <= 100.0) return 0.0;
-            
+
+           
+
             if (units <= 500.0) {
+
                 if (units <= 200.0) bill = (units - 100.0) * 2.35;
+
                 else if (units <= 400.0) bill = (100.0 * 2.35) + ((units - 200.0) * 4.70);
+
                 else bill = (100.0 * 2.35) + (200.0 * 4.70) + ((units - 400.0) * 6.30);
+
             } else {
+
                 if (units <= 600.0) bill = (300.0 * 4.70) + (100.0 * 6.30) + ((units - 500.0) * 8.40);
+
                 else if (units <= 800.0) bill = (300.0 * 4.70) + (100.0 * 6.30) + (100.0 * 8.40) + ((units - 600.0) * 9.45);
+
                 else if (units <= 1000.0) bill = (300.0 * 4.70) + (100.0 * 6.30) + (100.0 * 8.40) + (200.0 * 9.45) + ((units - 800.0) * 10.50);
+
                 else bill = (300.0 * 4.70) + (100.0 * 6.30) + (100.0 * 8.40) + (200.0 * 9.45) + (200.0 * 10.50) + ((units - 1000.0) * 11.55);
+
             }
+
             return bill;
+
         }
+
+
 
         // 3. CHART INITIALIZATION (🌟 UPDATED WITH GRAPH INTELLIGENCE 🌟)
+
         const ctx = document.getElementById('powerChart').getContext('2d');
+
         const powerChart = new Chart(ctx, {
+
             type: 'line',
+
             data: {
-                labels: [], 
+
+                labels: [],
+
                 datasets: [{
+
                     label: 'Power (Watts)',
-                    data: [], 
-                    borderColor: '#06b6d4', 
+
+                    data: [],
+
+                    borderColor: '#06b6d4',
+
                     backgroundColor: 'rgba(6, 182, 212, 0.1)',
+
                     borderWidth: 2,
-                    tension: 0.4, 
+
+                    tension: 0.4,
+
                     fill: true,
+
                     // NEW: Dynamic Colors and Sizes based on usage
+
                     pointBackgroundColor: function(context) {
+
                         var value = context.dataset.data[context.dataIndex];
+
                         if (value > 3.0) return '#10b981'; // Emerald Green for 9W Bulb
+
                         if (value >= 0.2 && value <= 3.0) return '#eab308'; // Yellow for Night Bulb
+
                         return '#ef4444'; // Red for OFF
+
                     },
+
                     pointRadius: function(context) {
+
                         var value = context.dataset.data[context.dataIndex];
+
                         return value > 3.0 ? 6 : 4; // Make high usage peaks pop out larger
+
                     }
+
                 }]
+
             },
+
             options: {
+
                 responsive: true,
+
                 maintainAspectRatio: false,
+
                 scales: {
+
                     x: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+
                     y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' }, beginAtZero: true }
+
                 },
+
                 plugins: { legend: { display: false } },
-                animation: { duration: 400 } 
+
+                animation: { duration: 400 }
+
             }
+
         });
 
-        // 4. DATA FETCHING LOGIC 
+
+
+        // 4. DATA FETCHING LOGIC
+
         async function fetchThingSpeakData() {
+
             try {
-                const cacheBuster = new Date().getTime(); 
+
+                const cacheBuster = new Date().getTime();
+
                 const url = `/api/get-data?_=${cacheBuster}`;
-                
+
+               
+
                 const response = await fetch(url, { cache: "no-store" });
+
                 const data = await response.json();
 
+
+
                 if (data.feeds && data.feeds.length > 0) {
+
                     const feed = data.feeds[0];
-                    
+
+                   
+
                     const voltage = parseFloat(feed.field1).toFixed(1);
+
                     const current = parseFloat(feed.field2).toFixed(3);
+
                     const power = parseFloat(feed.field3).toFixed(1);
+
                     const energy = parseFloat(feed.field4);
+
                     const pf = parseFloat(feed.field5).toFixed(2);
+
                     const bill = calculateTNBill(energy).toFixed(2);
 
+
+
                     document.getElementById('val-voltage').innerText = voltage;
+
                     document.getElementById('val-current').innerText = current;
+
                     document.getElementById('val-power').innerText = power;
+
                     document.getElementById('val-pf').innerText = pf;
+
                     document.getElementById('val-bill').innerText = bill;
-                    
+
+                   
+
                     const glow = document.getElementById('power-glow');
+
                     if(parseFloat(power) > 2.0) glow.classList.replace('opacity-0', 'opacity-100');
+
                     else glow.classList.replace('opacity-100', 'opacity-0');
+
                  
+
                     // EDGE AI INFERENCE LOGIC
+
                     const pwr = parseFloat(power);
+
                     let aiGuess = "Scanning...";
+
                     let guessColor = "text-slate-500";
 
+
+
                     if (pwr < 0.2) {
+
                         aiGuess = "🔴 OFF (No Load)";
+
                         guessColor = "text-red-500";
+
                     } else if (pwr >= 0.2 && pwr <= 3.0) {
+
                         aiGuess = "💡 0.5W Night Bulb";
+
                         guessColor = "text-yellow-400";
+
                     } else if (pwr > 3.0) {
+
                         aiGuess = "💡 9W LED Bulb";
+
                         guessColor = "text-emerald-400";
+
                     }
+
+
 
                     const aiElement = document.getElementById('ai-prediction');
+
                     aiElement.innerText = aiGuess;
+
                     aiElement.className = `text-3xl font-bold ${guessColor}`;
 
+
+
                     const timeString = new Date(feed.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                    
+
+                   
+
                     powerChart.data.labels.push(timeString);
+
                     powerChart.data.datasets[0].data.push(parseFloat(power));
 
+
+
                     if (powerChart.data.labels.length > 15) {
+
                         powerChart.data.labels.shift();
+
                         powerChart.data.datasets[0].data.shift();
+
                     }
+
                     powerChart.update();
-                    
+
+                   
+
                     document.getElementById('sync-status').innerText = "System Live";
+
                     document.getElementById('sync-status').classList.replace('text-red-400', 'text-emerald-400');
 
+
+
                     // 🌟 NEW: SMART ANALYTICS ENGINE 🌟
+
                     // (Reads directly from the chart's historical data)
+
                     const chartData = powerChart.data.datasets[0].data;
+
                     const chartLabels = powerChart.data.labels;
-                    
+
+                   
+
                     if (chartData.length > 0) {
+
                         let totalPwr = 0;
+
                         let maxPwr = 0;
+
                         let peakTime = "";
+
                         let idleCount = 0;
 
+
+
                         for (let i = 0; i < chartData.length; i++) {
+
                             let p = chartData[i];
+
                             totalPwr += p;
+
                             if (p > maxPwr) {
+
                                 maxPwr = p;
+
                                 peakTime = chartLabels[i];
+
                             }
+
                             if (p < 0.2) idleCount++;
+
                         }
+
+
 
                         let avgPwr = totalPwr / chartData.length;
+
                         let idlePercentage = (idleCount / chartData.length) * 100;
 
+
+
                         // Insight 1: Peak Alert Logic
+
                         const alertEl = document.getElementById('insight-alert');
+
                         const alertCard = document.getElementById('alert-card');
+
                         const alertTitle = document.getElementById('alert-title');
 
+
+
                         if (maxPwr > 3.0 && maxPwr > (avgPwr * 1.5)) {
+
                             alertEl.innerHTML = `⚠️ <span class="text-white font-bold">${maxPwr.toFixed(1)}W Peak</span> detected at ${peakTime}.`;
+
                             alertCard.className = "bg-slate-800 p-6 rounded-xl border border-rose-500/50 shadow-lg relative overflow-hidden transition-all duration-300";
+
                             alertTitle.className = "text-rose-400 font-bold flex items-center gap-2 mb-2";
+
                         } else {
+
                             alertEl.innerHTML = "Power usage is stable. No abnormal peaks detected recently.";
+
                             alertCard.className = "bg-slate-800 p-6 rounded-xl border border-slate-600 shadow-lg relative overflow-hidden transition-all duration-300";
+
                             alertTitle.className = "text-slate-400 font-bold flex items-center gap-2 mb-2";
+
                         }
+
+
 
                         // Insight 2: Savings Tip Logic
+
                         const tipEl = document.getElementById('insight-tip');
+
                         if (idlePercentage < 20 && avgPwr > 3.0) {
+
                              tipEl.innerHTML = "💡 Your 9W bulb is running constantly. Switching it off during idle hours could save you ₹45/month.";
+
                         } else if (idlePercentage > 50) {
+
                              tipEl.innerHTML = "✨ Great job! Devices are mostly idle. Phantom drain is minimal.";
+
                         } else {
+
                              tipEl.innerHTML = "🔌 Consider automating your appliances with smart schedules to reduce idle drain.";
+
                         }
+
                     }
 
+
+
                 }
+
             } catch (error) {
+
                 console.error("Error fetching data:", error);
+
                 document.getElementById('sync-status').innerText = "API Rate Limit. Waiting...";
+
                 document.getElementById('sync-status').classList.replace('text-emerald-400', 'text-red-400');
+
             }
+
         }
 
+
+
         fetchThingSpeakData();
+
         setInterval(fetchThingSpeakData, 25000);
+
     </script>
+
 </body>
+
 </html>
