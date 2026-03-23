@@ -7,7 +7,7 @@
 #include "secrets.h"
 
 // --- THINGSPEAK CONFIG ---
-String thingSpeakApiKey = "TS_WRITE_API_KEY"; 
+String thingSpeakApiKey = TS_WRITE_API_KEY; 
 const char* tsServer = "api.thingspeak.com";
 
 // --- HARDWARE SETTINGS ---
