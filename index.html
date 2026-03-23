@@ -50,6 +50,7 @@
             <div class="text-2xl font-bold text-emerald-400">₹<span id="val-bill">0.00</span></div>
         </div>
     </div>
+
     <div class="max-w-6xl mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg mb-8 flex items-center justify-between">
         <div>
             <h2 class="text-xl font-bold text-white flex items-center gap-2">
@@ -63,6 +64,26 @@
         </div>
     </div>
 
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 mt-6">
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-600 shadow-lg relative overflow-hidden transition-all duration-300" id="alert-card">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-rose-500/10 rounded-bl-full"></div>
+            <h3 class="text-slate-400 font-bold flex items-center gap-2 mb-2" id="alert-title">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                Peak Usage Alert
+            </h3>
+            <p id="insight-alert" class="text-slate-300">Collecting data to analyze trends...</p>
+        </div>
+
+        <div class="bg-slate-800 p-6 rounded-xl border border-emerald-500/50 shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/10 rounded-bl-full"></div>
+            <h3 class="text-emerald-400 font-bold flex items-center gap-2 mb-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                AI Savings Tip
+            </h3>
+            <p id="insight-tip" class="text-slate-300">Calculating potential savings...</p>
+        </div>
+    </div>
+
     <div class="max-w-6xl mx-auto bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
         <h2 class="text-lg font-semibold text-slate-300 mb-4">Real-Time Power Signature (W)</h2>
         <div class="relative h-72 w-full">
@@ -71,10 +92,7 @@
     </div>
 
     <script>
-       
-
         // 2. TN BILL CALCULATOR (Ported from C++)
-      
         function calculateTNBill(units) {
             let bill = 0.0;
             if (units <= 100.0) return 0.0;
@@ -91,8 +109,8 @@
             }
             return bill;
         }
-        // 3. CHART INITIALIZATION
-      
+
+        // 3. CHART INITIALIZATION (🌟 UPDATED WITH GRAPH INTELLIGENCE 🌟)
         const ctx = document.getElementById('powerChart').getContext('2d');
         const powerChart = new Chart(ctx, {
             type: 'line',
@@ -106,8 +124,17 @@
                     borderWidth: 2,
                     tension: 0.4, 
                     fill: true,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff'
+                    // NEW: Dynamic Colors and Sizes based on usage
+                    pointBackgroundColor: function(context) {
+                        var value = context.dataset.data[context.dataIndex];
+                        if (value > 3.0) return '#10b981'; // Emerald Green for 9W Bulb
+                        if (value >= 0.2 && value <= 3.0) return '#eab308'; // Yellow for Night Bulb
+                        return '#ef4444'; // Red for OFF
+                    },
+                    pointRadius: function(context) {
+                        var value = context.dataset.data[context.dataIndex];
+                        return value > 3.0 ? 6 : 4; // Make high usage peaks pop out larger
+                    }
                 }]
             },
             options: {
@@ -122,11 +149,9 @@
             }
         });
 
-        // 4. DATA FETCHING LOGIC (UPDATED WITH CACHE-BUSTER)
- 
+        // 4. DATA FETCHING LOGIC 
         async function fetchThingSpeakData() {
             try {
-               
                 const cacheBuster = new Date().getTime(); 
                 const url = `/api/get-data?_=${cacheBuster}`;
                 
@@ -148,12 +173,12 @@
                     document.getElementById('val-power').innerText = power;
                     document.getElementById('val-pf').innerText = pf;
                     document.getElementById('val-bill').innerText = bill;
+                    
                     const glow = document.getElementById('power-glow');
                     if(parseFloat(power) > 2.0) glow.classList.replace('opacity-0', 'opacity-100');
                     else glow.classList.replace('opacity-100', 'opacity-0');
                  
                     // EDGE AI INFERENCE LOGIC
-                    
                     const pwr = parseFloat(power);
                     let aiGuess = "Scanning...";
                     let guessColor = "text-slate-500";
@@ -184,9 +209,59 @@
                     }
                     powerChart.update();
                     
-            
                     document.getElementById('sync-status').innerText = "System Live";
                     document.getElementById('sync-status').classList.replace('text-red-400', 'text-emerald-400');
+
+                    // 🌟 NEW: SMART ANALYTICS ENGINE 🌟
+                    // (Reads directly from the chart's historical data)
+                    const chartData = powerChart.data.datasets[0].data;
+                    const chartLabels = powerChart.data.labels;
+                    
+                    if (chartData.length > 0) {
+                        let totalPwr = 0;
+                        let maxPwr = 0;
+                        let peakTime = "";
+                        let idleCount = 0;
+
+                        for (let i = 0; i < chartData.length; i++) {
+                            let p = chartData[i];
+                            totalPwr += p;
+                            if (p > maxPwr) {
+                                maxPwr = p;
+                                peakTime = chartLabels[i];
+                            }
+                            if (p < 0.2) idleCount++;
+                        }
+
+                        let avgPwr = totalPwr / chartData.length;
+                        let idlePercentage = (idleCount / chartData.length) * 100;
+
+                        // Insight 1: Peak Alert Logic
+                        const alertEl = document.getElementById('insight-alert');
+                        const alertCard = document.getElementById('alert-card');
+                        const alertTitle = document.getElementById('alert-title');
+
+                        if (maxPwr > 3.0 && maxPwr > (avgPwr * 1.5)) {
+                            alertEl.innerHTML = `⚠️ <span class="text-white font-bold">${maxPwr.toFixed(1)}W Peak</span> detected at ${peakTime}.`;
+                            alertCard.className = "bg-slate-800 p-6 rounded-xl border border-rose-500/50 shadow-lg relative overflow-hidden transition-all duration-300";
+                            alertTitle.className = "text-rose-400 font-bold flex items-center gap-2 mb-2";
+                        } else {
+                            alertEl.innerHTML = "Power usage is stable. No abnormal peaks detected recently.";
+                            alertCard.className = "bg-slate-800 p-6 rounded-xl border border-slate-600 shadow-lg relative overflow-hidden transition-all duration-300";
+                            alertTitle.className = "text-slate-400 font-bold flex items-center gap-2 mb-2";
+                        }
+
+                        // Insight 2: Savings Tip Logic
+                        const tipEl = document.getElementById('insight-tip');
+                        if (idlePercentage < 20 && avgPwr > 3.0) {
+                             tipEl.innerHTML = "💡 Your 9W bulb is running constantly. Switching it off during idle hours could save you ₹45/month.";
+                        } else if (idlePercentage > 50) {
+                             tipEl.innerHTML = "✨ Great job! Devices are mostly idle. Phantom drain is minimal.";
+                        } else {
+                             tipEl.innerHTML = "🔌 Consider automating your appliances with smart schedules to reduce idle drain.";
+                        }
+                    }
+
                 }
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -196,7 +271,6 @@
         }
 
         fetchThingSpeakData();
-    
         setInterval(fetchThingSpeakData, 25000);
     </script>
 </body>
